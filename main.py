@@ -12,6 +12,23 @@ import webbrowser
 import win32com.client as win32
 
 
+#Open Excel_file
+try:
+    wb_val = load_workbook(filename='Work_Hours.xlsx',
+                           data_only=True)  # Open filename.xlsx
+
+    sheet_val = wb_val['Hours']  # Get page "Hours"
+
+    df = pd.DataFrame({sheet_val['A1'].value: [sheet_val['A2'].value, sheet_val['A3'].value],
+                       sheet_val['B1'].value: [sheet_val['B2'].value, sheet_val['B3'].value],
+                       sheet_val['C1'].value: [sheet_val['C2'].value, sheet_val['C3'].value, ]})
+
+    bonus_day = pd.DataFrame({"A": [sheet_val['A19'].value, sheet_val['A20'].value, sheet_val['A21'].value],
+                              "B": [sheet_val['B19'].value, sheet_val['B20'].value, sheet_val['B21'].value]})
+except:
+    pass
+
+
 class mywindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(mywindow, self).__init__()
