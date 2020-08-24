@@ -79,6 +79,190 @@ class mywindow(QtWidgets.QMainWindow):
             device_lock_server text)
             """)
 
+            
+#Events for buttons
+        self.ui.submit_btn.clicked.connect(self.submit)
+        self.ui.delete_btn.clicked.connect(self.delete)
+        self.ui.query_btn.clicked.connect(self.query)
+        self.ui.query_btn_2.clicked.connect(self.query_user)
+        self.ui.btn_open_file.clicked.connect(self.open_file)
+        self.ui.btn_search.clicked.connect(self.search_info)
+        self.ui.btn_run_programm.clicked.connect(self.open_programm)
+        self.ui.btn_db_learn.clicked.connect(self.open_db_learn)
+        self.ui.btn_phone_list.clicked.connect(self.open_phone_list)
+        self.ui.btn_graphic.clicked.connect(self.show_grapcic)
+        self.ui.btn_feedback.clicked.connect(self.feed_back)
+        self.ui.btn_Outlook_message.clicked.connect(self.message_amt)
+        self.ui.btn_rdp.clicked.connect(self.RDP_connect)
+
+
+#===============================================================
+
+    #function feedback (btn feedback)
+    def feed_back(self,text):  
+        outlook = win32.Dispatch('outlook.application') 
+        mail = outlook.CreateItem(0)
+        mail.To = "Your_Email@gmail.com"
+        mail.Subject = "Title message"
+        mail.HtmlBody = ""
+        mail.Display(True)
+
+#===============================================================
+
+    #function in Tab "Work hours"
+    #function show (btn show)
+    def show_grapcic(self):
+        try:
+            model = pandasModel(df)
+            view = self.ui.TableView_1
+            view.setModel(model)
+            view.resizeColumnsToContents()
+            view.show()
+
+            model = pandasModel(bonus_day)
+            view = self.ui.TableView_2
+            view.setModel(model)
+            view.resizeColumnsToContents()
+            view.show()
+        except:
+            pass
+
+#===============================================================
+
+    #function in Tab "Cities"
+    #Search info about cities
+    def search_info(self):
+        conn = sqlite3.connect('filials.db')
+        c = conn.cursor()
+        searched = self.ui.search_box.text()
+        c.execute("select * from filials where filial like '%" + searched + "%'")
+        records = c.fetchall()
+
+        print_records = ""
+        
+        for record in records:
+
+            print_records += "City: " + str(record[1]) + "\n" \
+            + "" + "\n" \
+            + "Print-Server: " + str(record[2]) + "\n" \
+            + "" + "\n" \
+            + "File-Server: " + str(record[3]) + "\n" \
+            + "" + "\n" \
+
+        self.ui.TextEdit_search.setText(print_records)
+
+
+    #Query function (search admins in db)
+    def query_user(self):
+        conn = sqlite3.connect('filials.db')
+        c = conn.cursor()
+        c.execute("SELECT *, oid FROM admins")
+        records = c.fetchall()
+
+        print_records = ""
+        for record in records:
+            print_records += str(record[4]) + ". " + str(record[0]) + " " + str(record[1]) + " from " + str(record[2]) + " to " + str(record[3]) + "\n" \
+                + "" + "\n" \
+
+        self.ui.TextEdit_query2.setText(print_records)
+
+        conn.commit()
+        conn.close()
+
+#===============================================================
+    #Functions in Tab "Admin"
+    #Query function in Tab "Admin" (search admins in db)
+    def query(self):
+        conn = sqlite3.connect('filials.db')
+        c = conn.cursor()
+        c.execute("SELECT *, oid FROM admins")
+        records = c.fetchall()
+        print_records = ""
+        for record in records:
+            print_records += str(record[4]) + ". " + str(record[0]) + " " + str(record[1]) + " from " + str(record[2]) + " to " + str(record[3])+ "\n" \
+                + "" + "\n" \
+
+        self.ui.Label_query.setText(print_records)
+        self.ui.TextEdit_query2.setText(print_records)
+        conn.commit()
+        conn.close()
+
+
+    #Delete records function in Tab "Admin"
+    def delete(self):
+        conn = sqlite3.connect('filials.db')
+        c = conn.cursor()
+        try:    
+            c.execute("DELETE from admins WHERE oid = " + self.ui.delete_box.text())
+            self.ui.delete_box.setText("")
+        except:
+            pass
+        conn.commit()
+        conn.close()
+
+
+    #Submit function in Tab "Admin"
+    def submit(self):
+        conn = sqlite3.connect('filials.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO admins VALUES (:f_name, :filial, :data_start, :data_finish)",
+        {'f_name': self.ui.f_name.text(),
+         'filial': self.ui.filial.text(),
+         'data_start': self.ui.data_start.text(),
+        'data_finish': self.ui.data_finish.text(),
+        })
+        conn.commit()
+        conn.close()
+        #clear the Text Boxes
+        self.ui.f_name.setText("")
+        self.ui.filial.setText("")
+        self.ui.data_start.setText("")
+        self.ui.data_finish.setText("")
+        
+#===============================================================
+
+    #Functions in Tab "Control Panel"
+    #message Outlook (btn message Outlook)
+    def message_amt(self):
+        outlook = win32.Dispatch('outlook.application')
+        mail = outlook.CreateItem(0)
+        mail.To = "Your_Email_here@gmail.com"
+        mail.Subject = ""
+        mail.Body = 'Text body'
+        mail.Display(True)
+
+
+    #run RDP (btn run_RDP)
+    def RDP_connect(self):
+        Input_PC = self.ui.lbl.text()
+        rdp = subprocess.Popen('mstsc.exe /v:' + Input_PC)
+
+
+    #Open_programm (btn run programm)
+    def open_programm(self):
+        try:
+            os.startfile(r'calc.exe') #For example this button runing
+        except:
+            pass
+
+
+    #Db_learn (btn DB learn)
+    def open_db_learn(self):
+        os.startfile(r'onenote:\\Your Onenote file')
+
+
+    #Open phone lists or any link in browser
+    def open_phone_list(self):
+        webbrowser.open("http://your_link_here", new=2)
+
+
+    #Open file
+    def open_file(self):
+        file_path = QFileDialog.getOpenFileName()
+        subprocess.Popen(file_path, shell=True)
+
+#===============================================================
+
 
 class Ui_Form(object):
 
